@@ -8,6 +8,7 @@ library UniswapV2Library {
     using SafeMath for uint;
 
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
+    //token address排序
     function sortTokens(address tokenA, address tokenB) internal pure returns (address token0, address token1) {
         require(tokenA != tokenB, 'UniswapV2Library: IDENTICAL_ADDRESSES');
         (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
@@ -41,6 +42,9 @@ library UniswapV2Library {
 
     // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
+        //用A换B，收A的手续费
+        //收3%手续费，保持k不变，计算amountOut
+        //意味着swap不会改变池子的k值
         require(amountIn > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT');
         require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
         uint amountInWithFee = amountIn.mul(997);
@@ -64,7 +68,9 @@ library UniswapV2Library {
         amounts = new uint[](path.length);
         amounts[0] = amountIn;
         for (uint i; i < path.length - 1; i++) {
+            //获取当前池子中两种代币的数量
             (uint reserveIn, uint reserveOut) = getReserves(factory, path[i], path[i + 1]);
+            //amountOut                  amountIn
             amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
         }
     }
